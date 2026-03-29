@@ -526,7 +526,6 @@ const PersonalDashboardPage = () => {
               <thead className="bg-slate-100 text-slate-700">
                 <tr>
                   <th className="px-4 py-3 font-semibold">Task ID</th>
-                  <th className="px-4 py-3 font-semibold">Mongo ID</th>
                   <th className="px-4 py-3 font-semibold">Service</th>
                   <th className="px-4 py-3 font-semibold">Task</th>
                   <th className="px-4 py-3 font-semibold">Priority</th>
@@ -541,9 +540,6 @@ const PersonalDashboardPage = () => {
                     <td className="px-4 py-3 font-bold text-slate-900">
                       {task.id}
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-500">
-                      {task.mongoId}
-                    </td>
                     <td className="px-4 py-3">{task.service}</td>
                     <td className="px-4 py-3">{task.task}</td>
                     <td className="px-4 py-3">{task.priority}</td>
@@ -556,7 +552,7 @@ const PersonalDashboardPage = () => {
                 {!isLoading && visibleRows.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={8}
+                      colSpan={7}
                       className="px-4 py-6 text-center text-slate-500"
                     >
                       No personal tasks found for this filter set.
