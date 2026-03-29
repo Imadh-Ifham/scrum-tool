@@ -88,6 +88,13 @@ const PersonalDashboardPage = () => {
   const [isSavingCapacity, setIsSavingCapacity] = useState(false);
   const [capacityMessage, setCapacityMessage] = useState<string | null>(null);
 
+  const handleAssigneeChange = (assignee: string) => {
+    setSelectedAssignee(assignee);
+    setFilterDraft(defaultFilters);
+    setAppliedFilters(defaultFilters);
+    setCapacityMessage(null);
+  };
+
   const fetchPersonalDashboard = useCallback(
     async (assignee: string, filters: FilterState) => {
       if (!assignee) {
@@ -283,7 +290,7 @@ const PersonalDashboardPage = () => {
               </span>
               <select
                 value={selectedAssignee}
-                onChange={(event) => setSelectedAssignee(event.target.value)}
+                onChange={(event) => handleAssigneeChange(event.target.value)}
                 className="w-full rounded-xl border border-cyan-300 bg-white px-3 py-2 text-slate-800 outline-none transition focus:border-cyan-500"
               >
                 {assignees.map((assignee) => (
@@ -325,7 +332,7 @@ const PersonalDashboardPage = () => {
                 <button
                   key={assignee}
                   type="button"
-                  onClick={() => setSelectedAssignee(assignee)}
+                  onClick={() => handleAssigneeChange(assignee)}
                   className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
                     isSelected
                       ? "border-cyan-600 bg-cyan-600 text-white"
