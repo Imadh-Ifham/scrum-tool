@@ -10,6 +10,48 @@ dotenv.config();
 
 const app = express();
 const port = Number(process.env.PORT || 5000);
+const selfPingIntervalMs = 5 * 60 * 1000;
+
+const getSelfPingUrl = () => {
+  const baseUrl =
+    process.env.SELF_PING_URL ||
+    process.env.RENDER_EXTERNAL_URL ||
+    process.env.APP_URL;
+
+  if (!baseUrl) {
+    return null;
+  }
+
+  return `${baseUrl.replace(/\/$/, "")}/api/health`;
+};
+
+const startSelfPing = () => {
+  if (process.env.NODE_ENV !== "production") {
+    return;
+  }
+
+  const pingUrl = getSelfPingUrl();
+  if (!pingUrl) {
+    console.warn(
+      "Self-ping is disabled. Set SELF_PING_URL (or APP_URL/RENDER_EXTERNAL_URL) in production.",
+    );
+    return;
+  }
+
+  const ping = async () => {
+    try {
+      const response = await fetch(pingUrl);
+      console.log(`Ping response status: ${response.status}`);
+    } catch (error) {
+      console.warn("Self-ping request failed", error?.message || error);
+    }
+  };
+
+  setInterval(ping, selfPingIntervalMs);
+  console.log(
+    `Self-ping enabled: ${pingUrl} every ${selfPingIntervalMs / 60000} minutes`,
+  );
+};
 
 app.use(
   cors({
@@ -59,6 +101,7 @@ const startServer = async () => {
     await connectToDatabase();
     app.listen(port, () => {
       console.log(`Server listening on http://localhost:${port}`);
+      startSelfPing();
     });
   } catch (error) {
     console.error("Failed to start server", error);
