@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import taskRoutes from "./routes/taskRoutes.js";
 import { connectToDatabase } from "./config/db.js";
-import { seedTasks } from "./seedData.js";
+import { seedTasks } from "./_internal/seed/private/seedData.js";
 import { Task } from "./models/Task.js";
 
 dotenv.config();

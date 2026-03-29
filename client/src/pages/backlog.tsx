@@ -94,8 +94,8 @@ const BacklogPage = () => {
   const [tasks, setTasks] = useState<BacklogTask[]>([]);
   const [stats, setStats] = useState<BacklogStats>(defaultStats);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSeeding, setIsSeeding] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null);
   const [draftValue, setDraftValue] = useState("");
@@ -191,6 +191,7 @@ const BacklogPage = () => {
       }
 
       setNewTask(emptyNewTask);
+      setShowCreateModal(false);
       await fetchFiltersData();
       await fetchBacklogData();
     } catch (error) {
@@ -313,30 +314,6 @@ const BacklogPage = () => {
     }
   };
 
-  const seedTasks = async () => {
-    setIsSeeding(true);
-    setErrorMessage(null);
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/tasks/seed`, {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to seed tasks");
-      }
-
-      await fetchFiltersData();
-      await fetchBacklogData();
-    } catch (error) {
-      setErrorMessage(
-        error instanceof Error ? error.message : "Unable to seed tasks",
-      );
-    } finally {
-      setIsSeeding(false);
-    }
-  };
-
   useEffect(() => {
     const init = async () => {
       try {
@@ -363,7 +340,7 @@ const BacklogPage = () => {
 
   const priorities = useMemo(() => {
     return ["All", ...PRIORITY_OPTIONS];
-  }, [allTasks]);
+  }, []);
 
   const assigneeOptions = useMemo(() => {
     return [
@@ -485,13 +462,21 @@ const BacklogPage = () => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
+          <Link
+            to="/seed"
+            className="rounded-xl bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-500"
+          >
+            Open Seed Manager
+          </Link>
           <button
             type="button"
-            onClick={seedTasks}
-            disabled={isSeeding}
-            className="rounded-xl bg-emerald-600 px-4 py-2 font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
+            onClick={() => {
+              setShowCreateModal(true);
+              setErrorMessage(null);
+            }}
+            className="rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white transition hover:bg-slate-800"
           >
-            {isSeeding ? "Seeding..." : "Seed Sample Tasks"}
+            Create Task
           </button>
           <button
             type="button"
@@ -509,119 +494,147 @@ const BacklogPage = () => {
           </p>
         ) : null}
 
-        <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <h2 className="mb-3 text-lg font-bold text-slate-900">
-            Create New Task
-          </h2>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-            <input
-              value={newTask.id}
-              onChange={(event) =>
-                setNewTask((prev) => ({ ...prev, id: event.target.value }))
-              }
-              placeholder="ID (e.g., BLG-200)"
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
-            />
-            <input
-              value={newTask.service}
-              onChange={(event) =>
-                setNewTask((prev) => ({ ...prev, service: event.target.value }))
-              }
-              placeholder="Service"
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
-            />
-            <input
-              value={newTask.task}
-              onChange={(event) =>
-                setNewTask((prev) => ({ ...prev, task: event.target.value }))
-              }
-              placeholder="Task"
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
-            />
-            <input
-              value={newTask.sp}
-              type="number"
-              min={0}
-              onChange={(event) =>
-                setNewTask((prev) => ({
-                  ...prev,
-                  sp: Number(event.target.value),
-                }))
-              }
-              placeholder="SP"
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
-            />
-            <input
-              value={newTask.rationale}
-              onChange={(event) =>
-                setNewTask((prev) => ({
-                  ...prev,
-                  rationale: event.target.value,
-                }))
-              }
-              placeholder="Rationale"
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 md:col-span-2"
-            />
-            <select
-              value={newTask.priority}
-              onChange={(event) =>
-                setNewTask((prev) => ({
-                  ...prev,
-                  priority: event.target.value as TaskPriority,
-                }))
-              }
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
-            >
-              {PRIORITY_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <select
-              value={newTask.assignedTo}
-              onChange={(event) =>
-                setNewTask((prev) => ({
-                  ...prev,
-                  assignedTo: event.target.value,
-                }))
-              }
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
-            >
-              {assigneeOptions.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
-            <select
-              value={newTask.status}
-              onChange={(event) =>
-                setNewTask((prev) => ({
-                  ...prev,
-                  status: event.target.value as TaskStatus,
-                }))
-              }
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
-            >
-              {STATUS_OPTIONS.map((option) => (
-                <option key={option} value={option}>
-                  {option}
-                </option>
-              ))}
-            </select>
+        {showCreateModal ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4">
+            <section className="w-full max-w-4xl rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl md:p-6">
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-lg font-bold text-slate-900">
+                  Create New Task
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="rounded-lg border border-slate-300 px-3 py-1 text-sm font-semibold text-slate-700 transition hover:border-slate-400"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+                <input
+                  value={newTask.id}
+                  onChange={(event) =>
+                    setNewTask((prev) => ({ ...prev, id: event.target.value }))
+                  }
+                  placeholder="ID (e.g., BLG-200)"
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                />
+                <input
+                  value={newTask.service}
+                  onChange={(event) =>
+                    setNewTask((prev) => ({
+                      ...prev,
+                      service: event.target.value,
+                    }))
+                  }
+                  placeholder="Service"
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                />
+                <input
+                  value={newTask.task}
+                  onChange={(event) =>
+                    setNewTask((prev) => ({
+                      ...prev,
+                      task: event.target.value,
+                    }))
+                  }
+                  placeholder="Task"
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                />
+                <input
+                  value={newTask.sp}
+                  type="number"
+                  min={0}
+                  onChange={(event) =>
+                    setNewTask((prev) => ({
+                      ...prev,
+                      sp: Number(event.target.value),
+                    }))
+                  }
+                  placeholder="SP"
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                />
+                <input
+                  value={newTask.rationale}
+                  onChange={(event) =>
+                    setNewTask((prev) => ({
+                      ...prev,
+                      rationale: event.target.value,
+                    }))
+                  }
+                  placeholder="Rationale"
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 md:col-span-2"
+                />
+                <select
+                  value={newTask.priority}
+                  onChange={(event) =>
+                    setNewTask((prev) => ({
+                      ...prev,
+                      priority: event.target.value as TaskPriority,
+                    }))
+                  }
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                >
+                  {PRIORITY_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={newTask.assignedTo}
+                  onChange={(event) =>
+                    setNewTask((prev) => ({
+                      ...prev,
+                      assignedTo: event.target.value,
+                    }))
+                  }
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                >
+                  {assigneeOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={newTask.status}
+                  onChange={(event) =>
+                    setNewTask((prev) => ({
+                      ...prev,
+                      status: event.target.value as TaskStatus,
+                    }))
+                  }
+                  className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                >
+                  {STATUS_OPTIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="mt-4 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={createTask}
+                  disabled={isCreating}
+                  className="rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {isCreating ? "Creating..." : "Create Task"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 transition hover:border-slate-400"
+                >
+                  Cancel
+                </button>
+              </div>
+            </section>
           </div>
-          <div className="mt-3">
-            <button
-              type="button"
-              onClick={createTask}
-              disabled={isCreating}
-              className="rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isCreating ? "Creating..." : "Create Task"}
-            </button>
-          </div>
-        </section>
+        ) : null}
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <label className="space-y-2">
