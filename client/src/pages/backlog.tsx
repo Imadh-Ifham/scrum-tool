@@ -43,7 +43,6 @@ const API_BASE_URL =
 
 const PRIORITY_OPTIONS: TaskPriority[] = ["Critical", "High", "Medium", "Low"];
 const STATUS_OPTIONS: TaskStatus[] = ["Pending", "Completed"];
-const PREDEFINED_ASSIGNEES = ["Aisha", "Ravi", "Lina", "Nikhil", "Sara"];
 
 const defaultStats: BacklogStats = {
   totalTasks: 0,
@@ -59,7 +58,7 @@ const emptyNewTask: Omit<BacklogTask, "_id"> = {
   priority: "Medium",
   sp: 0,
   rationale: "",
-  assignedTo: PREDEFINED_ASSIGNEES[0],
+  assignedTo: "",
   status: "Pending",
 };
 
@@ -343,12 +342,7 @@ const BacklogPage = () => {
   }, []);
 
   const assigneeOptions = useMemo(() => {
-    return [
-      ...new Set([
-        ...PREDEFINED_ASSIGNEES,
-        ...allTasks.map((item) => item.assignedTo),
-      ]),
-    ];
+    return [...new Set([...allTasks.map((item) => item.assignedTo)])];
   }, [allTasks]);
 
   const assignees = useMemo(() => {
