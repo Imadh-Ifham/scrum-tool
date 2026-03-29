@@ -40,6 +40,29 @@ Server default URL: `http://localhost:5000`
     - `remainingTasks`
     - `totalStoryPoints`
 
+- `GET /api/tasks/assignee-dashboard`
+  - Query params:
+    - `assignedTo` (required for a person dashboard)
+    - `service` (optional)
+    - `priority` (optional)
+    - `status` (optional)
+    - `idQuery` (optional, partial match by task ID)
+  - Returns:
+    - `assignees` (all distinct people in tasks)
+    - `assigneeCapacities` (`assignee`, `capacity`)
+    - `selectedAssignee`
+    - `dashboard`
+      - `storyPointCapacity`
+      - `overall` stats + task IDs + detailed tasks
+      - `filtered` stats + task IDs + detailed tasks
+      - `filters` (current filters + available options)
+
+- `PATCH /api/tasks/assignee-capacity`
+  - Body:
+    - `assignee` (required)
+    - `capacity` (required, non-negative number)
+  - Upserts per-person story capacity in the database.
+
 - `POST /api/tasks`
   - Body fields:
     - `id`

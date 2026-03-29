@@ -486,6 +486,12 @@ const BacklogPage = () => {
           >
             Refresh
           </button>
+          <Link
+            to="/personal-dashboard"
+            className="rounded-xl border border-cyan-300 bg-cyan-50 px-4 py-2 font-semibold text-cyan-800 transition hover:bg-cyan-100"
+          >
+            Open Personal Dashboard
+          </Link>
         </div>
 
         {errorMessage ? (
